@@ -18,6 +18,9 @@ enum BackgroundImageTypes {
 let backgroundImages: Image[] = [];
 let cells: number[] = [];
 
+game.currentScene().physicsEngine = new CalmerManPhysicsEngine();
+game.consoleOverlay.setVisible(true);
+
 addImage(img`
     7 7 7 7 7 7 7 7 6 7
     7 6 7 7 7 7 7 7 7 7
@@ -44,6 +47,51 @@ addImage(img`
     `, BackgroundImageTypes.Block)
 
 createGrid();
+
+let player: Sprite = sprites.create(img`
+    . . . 9 9 9 9 . . .
+    . 9 9 d d d d 9 9 .
+    9 d d f d d f d d 9
+    9 d d f d d f d d 9
+    . 9 9 d d d d 9 9 .
+    3 3 . 9 9 9 9 . 3 3
+    3 3 9 9 9 9 9 9 3 3
+    . . 9 9 9 9 9 9 . .
+    . . 3 3 9 9 3 3 . .
+    . . 3 3 . . 3 3 . .
+    `, 0);
+
+game.eventContext().registerFrameHandler(19, function () {
+    player.setVelocity(0, 0);
+    if (controller.up.isPressed()) {
+        player.vy = -50;
+    } else if (controller.down.isPressed()) {
+        player.vy = 50;
+    } else if (controller.left.isPressed()) {
+        player.vx = -50
+    } else if (controller.right.isPressed()) {
+        player.vx = 50;
+    }
+})
+controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
+    let candle: Sprite = sprites.create(img`
+        . . . . 5 . . . . .
+        . . . 2 5 . . . . .
+        . . . . 2 4 . . . .
+        . . . . 2 2 . . . .
+        . . . . 6 6 . . . .
+        . . . . 6 9 . . . .
+        . . . . 9 9 . . . .
+        . . . . 9 9 . . . .
+        . . . . 9 9 . . . .
+        . . . . 9 9 . . . .
+        `, 0);
+
+
+    candle.x = player.x;
+    candle.y = player.y;
+    candle.lifespan = 2000;
+})
 game.onPaint(function () {
     drawCells();
 });
@@ -102,6 +150,7 @@ function addImage(img: Image, imageType: BackgroundImageTypes) {
     }
     backgroundImages[imageType] = img;
 }
+
 
 /**
  * Renders the cells onto the screen

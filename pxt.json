@@ -7,7 +7,9 @@
     },
     "files": [
         "README.md",
-        "main.ts"
+        "main.ts",
+        "physics.ts",
+        "tilemap.ts"
     ],
     "testFiles": [
         "test.ts"
