@@ -12,7 +12,8 @@ const HEIGHT: number = Math.idiv(screen.height
 
 enum BackgroundImageTypes {
     Floor,
-    Block
+    Block,
+    Box
 }
 
 let backgroundImages: Image[] = [];
@@ -45,6 +46,18 @@ addImage(img`
     b b b b b b c b b b
     b b b b b b c b b b
 `, BackgroundImageTypes.Block)
+addImage(img`
+    c c c c c c c c c c
+    c d d 1 1 1 1 d d c
+    c d 1 1 1 1 1 1 d c
+    c 1 1 f 1 1 f 1 1 c
+    c 1 1 1 1 1 1 1 1 c
+    c 1 1 1 f f 1 1 1 c
+    c d 1 f 1 1 f 1 d c
+    c d 1 1 1 1 1 1 d c
+    c d d 1 1 1 1 d d c
+    c c c c c c c c c c
+`, BackgroundImageTypes.Box)
 
 createGrid();
 
@@ -145,6 +158,15 @@ function createGrid() {
         for (let y: number = 2; y < HEIGHT - 1; y += 2) {
             cells[coordToIndex(x, y)] = BackgroundImageTypes.Block;
         }
+    }
+
+    // Random Boxes
+    for (let i = 0; i < 10; i++) {
+        let choice = Math.randomRange(0, cells.length - 1);
+        while (cells[choice] != BackgroundImageTypes.Floor) {
+            choice = Math.randomRange(0, cells.length - 1);
+        }
+        cells[choice] = BackgroundImageTypes.Box;
     }
 }
 
