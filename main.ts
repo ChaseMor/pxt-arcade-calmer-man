@@ -32,7 +32,7 @@ addImage(img`
     7 7 7 7 7 7 7 7 7 7
     7 7 7 7 7 7 7 7 7 7
     7 7 7 7 7 7 7 7 7 7
-    `, BackgroundImageTypes.Floor)
+`, BackgroundImageTypes.Floor)
 addImage(img`
     c c c c c c c c c c
     b b c b b b b b b b
@@ -44,7 +44,7 @@ addImage(img`
     b b b b b b c b b b
     b b b b b b c b b b
     b b b b b b c b b b
-    `, BackgroundImageTypes.Block)
+`, BackgroundImageTypes.Block)
 
 createGrid();
 
@@ -59,18 +59,39 @@ let player: Sprite = sprites.create(img`
     . . 9 9 9 9 9 9 . .
     . . 3 3 9 9 3 3 . .
     . . 3 3 . . 3 3 . .
-    `, 0);
+`, 0);
 
+let currDirection: controller.Button = undefined;
 game.eventContext().registerFrameHandler(19, function () {
     player.setVelocity(0, 0);
-    if (controller.up.isPressed()) {
-        player.vy = -50;
-    } else if (controller.down.isPressed()) {
-        player.vy = 50;
-    } else if (controller.left.isPressed()) {
-        player.vx = -50
-    } else if (controller.right.isPressed()) {
-        player.vx = 50;
+    if (currDirection == undefined || (currDirection != undefined && !currDirection.isPressed())) {
+        currDirection = undefined;
+        if (controller.up.isPressed()) {
+            currDirection = controller.up;
+        }
+        if (controller.down.isPressed()) {
+            currDirection = controller.down;
+        }
+        if (controller.left.isPressed()) {
+            currDirection = controller.left;
+        }
+        if (controller.right.isPressed()) {
+            currDirection = controller.right;
+        }
+    }
+    switch (currDirection) {
+        case controller.up:
+            player.setVelocity(0, -50);
+            break;
+        case controller.down:
+            player.setVelocity(0, 50);
+            break;
+        case controller.left:
+            player.setVelocity(-50, 0);
+            break;
+        case controller.right:
+            player.setVelocity(50, 0);
+            break;
     }
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
@@ -85,7 +106,7 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
         . . . . 9 9 . . . .
         . . . . 9 9 . . . .
         . . . . 9 9 . . . .
-        `, 0);
+    `, 0);
 
 
     candle.x = player.x;

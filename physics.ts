@@ -25,10 +25,10 @@ class CalmerManPhysicsEngine extends PhysicsEngine {
             1 . . . . . . . . . . . . . 1
             1 . . . . . . . . . . . . . 1
             1 1 1 1 1 1 1 1 1 1 1 1 1 1 1
-            `);
+        `);
         this.tm.setTile(1, img`
             1
-            `, true);
+        `, true);
     }
 
     addSprite(sprite: Sprite) {
@@ -65,68 +65,7 @@ class CalmerManPhysicsEngine extends PhysicsEngine {
     collisions() {
         control.enablePerfCounter("phys_collisions")
 
-        // 1: clear obstacles
-        for (let i = 0; i < this.sprites.length; ++i)
-            this.sprites[i].clearObstacles();
-        /*
-        // 2: refresh non-ghost collision map
-        const colliders = this.sprites.filter(sprite => !(sprite.flags & sprites.Flag.Ghost));
 
-        if (colliders.length < 10) {
-            // not enough sprite, just brute force it
-            this.map = undefined;
-        } else {
-            if (!this.map) this.map = new sprites.SpriteMap();
-            this.map.update(colliders);
-        }
-
-        // 3: go through sprite and handle collisions
-        const scene = game.currentScene();
-        const tm = scene.tileMap;
-
-        for (const sprite of colliders) {
-            const overSprites = scene.physicsEngine.overlaps(sprite);
-            for (const overlapper of overSprites) {
-                // Maintaining invariant that the sprite with the higher ID has the other sprite as an overlapper
-                const higher = sprite.id > overlapper.id ? sprite : overlapper;
-                const lower = higher === sprite ? overlapper : sprite;
-
-                if (higher._overlappers.indexOf(lower.id) === -1) {
-                    if (sprite.overlapHandler) {
-                        higher._overlappers.push(lower.id);
-                        control.runInParallel(() => {
-                            sprite.overlapHandler(overlapper);
-                            higher._overlappers.removeElement(lower.id);
-                        });
-                    }
-
-                    scene.overlapHandlers
-                        .filter(h => h.kind == sprite.kind() && h.otherKind == overlapper.kind())
-                        .forEach(h => {
-                            higher._overlappers.push(lower.id);
-                            control.runInParallel(() => {
-                                h.handler(sprite, overlapper);
-                                higher._overlappers.removeElement(lower.id);
-                            });
-                        });
-                }
-            }
-
-            const xDiff = Fx.sub(sprite._x, sprite._lastX);
-            const yDiff = Fx.sub(sprite._y, sprite._lastY);
-            if (xDiff !== Fx.zeroFx8 || yDiff !== Fx.zeroFx8) {
-                if (Fx.abs(xDiff) < MAX_DISTANCE &&
-                    Fx.abs(yDiff) < MAX_DISTANCE) {
-                    // Undo the move
-                    sprite._x = sprite._lastX;
-                    sprite._y = sprite._lastY;
-
-                    // Now move it with the tilemap in mind
-                    this.moveSprite(sprite, tm, xDiff, yDiff);
-                }
-            }
-
-        }*/
     }
 
     /**
@@ -159,17 +98,36 @@ class CalmerManPhysicsEngine extends PhysicsEngine {
         }
 
         if (this.tm && this.tm.enabled && !(s.flags & sprites.Flag.Ghost)) {
+
+            const currTileX = Math.idiv((s.x - this.tm.PADDING_LEFT), 10);
+            const currTileY = Math.idiv((s.y - this.tm.PADDING_TOP), 10);
+
+            const relX = (s.x - this.tm.PADDING_LEFT) % 10;
+            const relY = (s.y - this.tm.PADDING_TOP) % 10;
+
+
+            const PADDING_RANGE = 4; // Must be less than half of cell size (5)
+
+            if (dy !== Fx.zeroFx8) {
+                if (relX < 5 && relX > 5 - PADDING_RANGE) {
+                    dx = Fx.min(Fx8(5 - relX), Fx.abs(dy));
+                } else if (relX > 5 && relX < 5 + PADDING_RANGE) {
+                    dx = Fx.neg(Fx.min(Fx8(relX - 5), Fx.abs(dy)));
+                }
+            }
+
+            if (dx !== Fx.zeroFx8) {
+                if (relY < 5 && relY > 5 - PADDING_RANGE) {
+                    dy = Fx.min(Fx8(5 - relY), Fx.abs(dx));
+                } else if (relY > 5 && relY < 5 + PADDING_RANGE) {
+                    dy = Fx.neg(Fx.min(Fx8(relY - 5), Fx.abs(dx)));
+                }
+            }
+
             const top = Math.idiv((s.top - this.tm.PADDING_TOP), 10);
             const bottom = Math.idiv((s.bottom - this.tm.PADDING_TOP), 10);
             const left = Math.idiv((s.left - this.tm.PADDING_LEFT), 10);
             const right = Math.idiv((s.right - this.tm.PADDING_LEFT), 10);
-
-            if (this.tm.isObstacle(top, left)
-                || this.tm.isObstacle(top, right)
-                || this.tm.isObstacle(bottom, left)
-                || this.tm.isObstacle(top, right)) {
-                //return;
-            }
 
             const newTop = Math.idiv((s.top + Fx.toInt(dy) - this.tm.PADDING_TOP), 10);
             const newBottom = Math.idiv((s.bottom - 1 + Fx.toInt(dy) - this.tm.PADDING_TOP), 10);
@@ -186,11 +144,11 @@ class CalmerManPhysicsEngine extends PhysicsEngine {
                     dx = Fx8(((newLeft + 1) * 10 + this.tm.PADDING_LEFT) - Math.round(s.left));
                 }
             }
-            
+
             if (dy > Fx.zeroFx8) {
                 if (this.tm.isObstacle(newLeft, newBottom) || this.tm.isObstacle(newRight, newBottom)) {
                     dy = Fx8((newBottom * 10) + this.tm.PADDING_TOP - (Fx.toInt(s._y) + 10));
-                } 
+                }
             } else if (dy < Fx.zeroFx8) {
                 if (this.tm.isObstacle(newLeft, newTop) || this.tm.isObstacle(newRight, newTop)) {
                     dy = Fx8(((newTop + 1) * 10) + this.tm.PADDING_TOP - Math.round(s.top));
@@ -198,9 +156,9 @@ class CalmerManPhysicsEngine extends PhysicsEngine {
             }
         }
 
-        s._x = Fx.add(s._x, dx);
-        s._y = Fx.add(s._y, dy);
         s._lastX = s._x;
         s._lastY = s._y;
+        s._x = Fx.add(s._x, dx);
+        s._y = Fx.add(s._y, dy);
     }
 }
