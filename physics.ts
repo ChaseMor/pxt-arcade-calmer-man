@@ -106,7 +106,7 @@ class CalmerManPhysicsEngine extends PhysicsEngine {
             const relY = (s.y - this.tm.PADDING_TOP) % 10;
 
 
-            const PADDING_RANGE = 4; // Must be less than half of cell size (5)
+            const PADDING_RANGE = 5; // Must be less than half of cell size (5)
 
             if (dy !== Fx.zeroFx8) {
                 if (relX < 5 && relX > 5 - PADDING_RANGE) {
